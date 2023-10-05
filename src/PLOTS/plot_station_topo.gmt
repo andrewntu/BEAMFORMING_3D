@@ -1,0 +1,59 @@
+#!/bin/csh
+# GET PLOTTING PARAMETERS
+if ($#argv != 1) then
+  echo "USAGE: station.list"
+  exit 1
+endif
+gmtset ANOT_FONT_SIZE 10
+gmtset BASEMAP_TYPE plain
+gmtset PAPER_MEDIA A3
+gmtset MEASURE_UNIT cm
+#set per = $argv[1]
+set input_map = $argv[1]
+#set input_mapen = $argv[3]
+
+set out_name = `echo $input_map `
+set output_ps_file = ${out_name}.ps
+echo "writing $output_ps_file file"
+if (-f $output_ps_file) rm $output_ps_file
+
+#set cpt = elev-tek.ye.cpt 
+set cpt = topo.cpt
+set grdfile = Yell0009-topo.grd 
+set grd = topo.grd 
+set topofile = YS_TOPO_OF_2.txt 
+#set illufile = Yell0009-grad.grd
+
+set SCA = -JM8i
+set REG = -R-110.831/-110.8264/44.4593/44.465
+#set REG = -R-111.8/-109.85/44.2/45.2
+
+#gmtset BASEMAP_TYPE fancy
+psbasemap $REG $SCA -Gwhite -Ba0.001f0.001/a0.001f0.001WSen -Xc -Yc -P -V -K >! $output_ps_file
+pscoast $REG $SCA -Df -N2 -K -O -P >> $output_ps_file
+
+cat $argv[1] | awk '{print $4,$3}' | psxy $SCA $REG -St.3  -W2 -Gyellow -O -K >> $output_ps_file
+cat $argv[1] | awk '$1==756{print $4,$3}' | psxy $SCA $REG -St.3  -W2 -Gred -O -K >> $output_ps_file
+echo -110.829647 44.464345 | psxy $SCA $REG -Sa.8 -W3 -G250/0/0 -O -K >> $output_ps_file
+echo -110.828211897200987 44.460437153479248 | psxy $SCA $REG -Sa.8 -W3 -Ggreen -O -K >> $output_ps_file
+psxy $SCA $REG -O << ! >> $output_ps_file
+!
+convert -density 300 -trim $output_ps_file $output_ps_file'.jpg'
+rm $output_ps_file
+
+set SCA = -JM10i
+set REG = -R-110.8304/-110.8292/44.4643/44.4648
+set out_name = `echo $input_map `
+set output_ps_file = ${out_name}_zoomed.ps
+
+psbasemap $REG $SCA -Gwhite -Ba0.0002/0.0002WSen -Xc -Yc -P -V -K >! $output_ps_file
+pscoast $REG $SCA -Df -N2 -K -O -P >> $output_ps_file
+
+cat $argv[1] | awk '{print $4,$3}' | psxy $SCA $REG -St.6  -W2 -Gyellow -O -K >> $output_ps_file
+cat $argv[1] | awk '$1==756{print $4,$3}' | psxy $SCA $REG -St.6  -W2 -Gred -O -K >> $output_ps_file
+echo -110.829647 44.464345 | psxy $SCA $REG -Sa1.0 -W3 -G250/0/0 -O -K >> $output_ps_file
+echo -110.828211897200987 44.460437153479248 | psxy $SCA $REG -Sa.8 -W3 -Ggreen -O -K >> $output_ps_file
+psxy $SCA $REG -O << ! >> $output_ps_file
+!
+convert -density 300 -trim $output_ps_file $output_ps_file'.jpg'
+rm $output_ps_file
